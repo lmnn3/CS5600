@@ -19,15 +19,15 @@ public class Test_Client {
 			File file = new File("");
 			String absolutePath = file.getAbsolutePath();
 			
-			file = new File(absolutePath + "\\test_client\\client_1\\qute.jpg");
+			file = new File(absolutePath + "/test_client/client_1/qute.jpg");
 			Long fileLength = file.length();
 			System.out.println("fileLength :" + fileLength);
 			System.out.println("modified Length :" + Math.floor(0.05*fileLength));
-			peer1.startFileSenderManager("\\test_client\\client_1\\qute.jpg", 0, (long) Math.floor(0.05*fileLength));
-			peer2.startFileSenderManager("\\test_client\\client_2\\qute.jpg", (long)Math.floor(0.2*fileLength) + 1, (long)Math.floor(0.25*fileLength));
-			peer3.startFileSenderManager("\\test_client\\client_3\\qute.jpg",(long) Math.floor(0.4*fileLength) + 1, (long)Math.floor(0.45*fileLength));
-			peer4.startFileSenderManager("\\test_client\\client_4\\qute.jpg",(long) Math.floor(0.6*fileLength) + 1, (long)Math.floor(0.65*fileLength));
-			peer5.startFileSenderManager("\\test_client\\client_5\\qute.jpg", (long)Math.floor(0.8*fileLength) + 1, (long)Math.floor(0.85*fileLength));
+			peer1.startFileSenderManager("/test_client/client_1/qute.jpg", 0, (long) Math.floor(0.05*fileLength));
+			peer2.startFileSenderManager("/test_client/client_2/qute.jpg", (long)Math.floor(0.2*fileLength) + 1, (long)Math.floor(0.25*fileLength));
+			peer3.startFileSenderManager("/test_client/client_3/qute.jpg",(long) Math.floor(0.4*fileLength) + 1, (long)Math.floor(0.45*fileLength));
+			peer4.startFileSenderManager("/test_client/client_4/qute.jpg",(long) Math.floor(0.6*fileLength) + 1, (long)Math.floor(0.65*fileLength));
+			peer5.startFileSenderManager("/test_client/client_5/qute.jpg", (long)Math.floor(0.8*fileLength) + 1, (long)Math.floor(0.85*fileLength));
 			
 			try {
 				Thread t = new Thread();
@@ -85,15 +85,15 @@ public class Test_Client {
 			Peer peer10 = new Peer("/src/data/config.properties", "Client_10");
 			
 			peer6.getTrackerList();
-			peer6.getFileTracker("qute.jpg","\\test_client\\client_6");
+			peer6.getFileTracker("qute.jpg","/test_client/client_6");
 			peer7.getTrackerList();
-			peer7.getFileTracker("qute.jpg","\\test_client\\client_7");
+			peer7.getFileTracker("qute.jpg","/test_client/client_7");
 			peer8.getTrackerList();
-			peer8.getFileTracker("qute.jpg","\\test_client\\client_8");
+			peer8.getFileTracker("qute.jpg","/test_client/client_8");
 			peer9.getTrackerList();
-			peer9.getFileTracker("qute.jpg","\\test_client\\client_9");
+			peer9.getFileTracker("qute.jpg","/test_client/client_9");
 			peer10.getTrackerList();
-			peer10.getFileTracker("qute.jpg","\\test_client\\client_10");
+			peer10.getFileTracker("qute.jpg","/test_client/client_10");
 		}
 		//peer6.getFileTracker("qute.jpg");
 		

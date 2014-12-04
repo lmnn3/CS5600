@@ -25,7 +25,6 @@ public class FileSender implements Runnable
 		this.socket = socket;
 		File file = new File("");
 		this.share_file = file.getAbsolutePath() + share_file;
-		System.out.println("myQueue size:" + myQueue.size());
 		while(myQueue.size()%2 != 0)
 		{
 			try {
@@ -63,7 +62,6 @@ public class FileSender implements Runnable
 			peer_out = new BufferedOutputStream(socket.getOutputStream());
 
 			line = peer_in.readLine();
-			System.out.println("Peer read:" + line);
 			String[] tokens = line.split(" ");
 			//Separate the received command into corresponding fields according to protocol
 			filename = tokens[1];
@@ -73,7 +71,6 @@ public class FileSender implements Runnable
 			end_msg      = Long.parseLong(tokens[3].substring(0,tokens[3].length()-1));
 			len      = (int)(end_msg - start_msg) + 1;
 			buf = new byte[len];
-			System.out.println("msg_start:" + start_msg + ", msg_end:" + end_msg);
 			for(int lcv = 0; lcv < myQueueArray.length ; lcv++)
 			{
 				long sampleStart = (Long) myQueueArray[lcv];
@@ -85,9 +82,7 @@ public class FileSender implements Runnable
 					break;
 				}
 				
-				System.out.println("shared start:" + sampleStart + ", shared End:" + sampleEnd);
 			}
-			System.out.println("Sharing requested segment:" + isPresentWithinSharedPortion);
 			if(isPresentWithinSharedPortion)
 			{
 				//Read the selected chunk from the file stream and push to the peer
@@ -96,16 +91,14 @@ public class FileSender implements Runnable
 				RandomAccessFile raFile = new RandomAccessFile(file, "r");
 				raFile.seek(start_msg);
 				read = raFile.read(buf, 0, len);
-				System.out.println("file read data:" + new String(buf));
-				peer_out.write(buf, 0, len);
+				peer_out.write(buf, 0, read);
 				peer_out.flush();
-				System.out.println("Peer out message:" + new String(buf, "UTF-8"));
 				peer_in.close();
 				peer_out.close();
 			}
 			else
 			{
-				String errorRetrun = "ferr";
+				String errorRetrun = "\n";
 				peer_out.write(errorRetrun.getBytes());
 			}
 

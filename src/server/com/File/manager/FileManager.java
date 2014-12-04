@@ -199,7 +199,6 @@ public class FileManager {
 			ArrayList<PeerInfo> peers = tracker.getPeers();
 			if(peers != null && peers.size() > 0)
 			{
-				System.out.println("peers != null");
 				ArrayList<PeerInfo> removePeers = new ArrayList<PeerInfo>();
 				for(PeerInfo peer : peers)
 				{
@@ -215,7 +214,6 @@ public class FileManager {
 			}
 			else
 			{
-				System.out.println("Peers == null");
 				peers = new ArrayList<PeerInfo>();
 			}
 

@@ -14,6 +14,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -105,8 +106,6 @@ public class FileDownloadThread implements Callable<Boolean> {
 		//remove the pesky '>' character
 		md5_recvd = md5_recvd.substring(0, md5_recvd.length()-1);
 
-		//compare the received md5 with the computed for validity
-		md5_recvd = getMd5(md5_recvd);
 		//To compute the MD5 hash, the header and tail of the message are ignored
 		//then put all the data into one string and compute the hash
 		String content =  message.subList(1,message.size()-1).toString().replaceAll("\\[|\\]", "").replaceAll(", ", "\n");
@@ -202,10 +201,12 @@ public class FileDownloadThread implements Callable<Boolean> {
         }
         try {
 
+            //System.out.println(myQueue);
             if(removeObjects.size() > 0)
 				myQueue.removeAll(removeObjects);
             myQueue.put(share_start);
             myQueue.put(share_end);
+            //System.out.println(myQueue);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -301,11 +302,16 @@ public class FileDownloadThread implements Callable<Boolean> {
             i++;
             long downloadedEnd = (Long) myQueueArray[i];
 
-            if( downloadedStart <= start  && end <= downloadedEnd )
+
+            if( downloadedStart <= start && (downloadedEnd > start && downloadedEnd < end))
+            {
+                return downloadedEnd + 1;
+            }
+            else if( downloadedStart <= start  && (start + max_segment_size-1) <= downloadedEnd )
             {
                 return -1;
             }
-            else if( downloadedStart == start && downloadedEnd <= end )
+            else if (downloadedStart < start && (downloadedEnd > start && downloadedEnd < end))
             {
                 return downloadedEnd + 1;
             }
@@ -325,69 +331,71 @@ public class FileDownloadThread implements Callable<Boolean> {
         PrintWriter peer_out = null;
         BufferedInputStream peer_in = null;
 
-		while(myQueueArray.length != 2 || !(((Long) myQueueArray[0]) == 0) && (((Long)myQueueArray[1]) == filesize))
+        String filepath = currentPath + "/" + filename;
+        File file = new File(filepath);
+        RandomAccessFile raFile = null;
+        try {
+            raFile = new RandomAccessFile(file, "rwd");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        while(myQueueArray.length != 2 || (((Long) myQueueArray[0]) != 0 && ((Long)myQueueArray[1]) != filesize))
 		{
 
 			if(noOfSegmentsDownloaded == 0)
 			{
-				Thread t = new Thread();
-				try {
-					t.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
-				}
-				
-				tracker = this.getRecentTracker(filename);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                tracker = this.getRecentTracker(filename);
                 filesize = tracker.getDetails().getFilesize();
 			}
 
-			String filepath = currentPath + "/" + filename;
+            ArrayList<PeerInfo> peers = this.getSortedPeersOnTimestamp(tracker.getPeers());
 
-			File file = new File(filepath);
-
-			try {
-				RandomAccessFile raFile = new RandomAccessFile(file, "rwd");
-				ArrayList<PeerInfo> peers = this.getSortedPeersOnTimestamp(tracker.getPeers());
-
-				for(PeerInfo peer : peers)
-				{
-					myQueueArray =  myQueue.toArray();
-					long start = this.findSegmentStartForClient(myQueueArray, peer.getStart(), peer.getEnd());
-					long end = start + max_segment_size - 1;
-                    end = (end > peer.getEnd() ) ? peer.getEnd():  end;
-                    if( start != -1) {
-                        byte[] buffer = new byte[(int) (end - start + 1)];
-                        try {
-                            socket = new Socket(peer.getIp(), peer.getPort());
-                            peer_out = new PrintWriter(socket.getOutputStream(), true);
-                            peer_in = new BufferedInputStream(socket.getInputStream());
-                        } catch (IOException e) {
-                        //e.printStackTrace();
+            for(PeerInfo peer : peers)
+            {
+                myQueueArray =  myQueue.toArray();
+                long start = this.findSegmentStartForClient(myQueueArray, peer.getStart(), peer.getEnd());
+                long end = start + max_segment_size - 1;
+                end = (end >= peer.getEnd() ) ? peer.getEnd() :  end;
+                if( start != -1)
+                {
+                    byte[] buffer = new byte[(int) (end - start + 1)];
+                    try {
+                        socket = new Socket(peer.getIp(), peer.getPort());
+                        peer_out = new PrintWriter(socket.getOutputStream(), true);
+                        peer_in = new BufferedInputStream(socket.getInputStream());
+                        peer_out.println("<GET " + this.filename + " " + start + " " + end + ">");
+                        int read = peer_in.read(buffer, 0, (int) ((int) end - start + 1));
+                        if(read > 5) {
+                            raFile.seek(start);
+                            raFile.write(buffer, 0, read);
+                            socket.close();
+                            peer_out.close();
+                            peer_in.close();
+                            this.addSegmentToShare(start, end);
                         }
-                        peer_out.println("<GET " + this.filename + " " + start + " " + end+ ">");
-                        int read  = peer_in.read(buffer, 0, (int) ((int) end - start + 1));
-
-                        raFile.seek(start);
-                        raFile.write(buffer, 0, read);
-                        socket.close();
-                        peer_out.close();
-                        peer_in.close();
-                        this.addSegmentToShare(start, end);
-
+                    } catch (IOException e) {
+                        //e.printStackTrace();
                     }
-				}
-                raFile.close();
-
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                }
             }
         }
+
+
+        try {
+            raFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         SharedFileDetails info = new SharedFileDetails();
-        File f = new File(currentPath);
+        File f = new File(currentPath + "/" + filename);
         info.filesize = f.length();
         info.filename = filename;
         info.description = "desc";
@@ -415,7 +423,7 @@ public class FileDownloadThread implements Callable<Boolean> {
         {
             System.err.println(ex);
         }
-		return info.md5 == tracker.getDetails().getMd5();
+		return info.md5.equals(tracker.getDetails().getMd5());
 	}
 
 }

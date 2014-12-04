@@ -1,13 +1,22 @@
 package client;
 
 import java.io.File;
+import java.util.Date;
 
 public class Test_Client {
 
+    public static void pause(int seconds){
+            Date start = new Date();
+            Date end = new Date();
+            while(end.getTime() - start.getTime() < seconds * 1000){
+                end = new Date();
+            }
+        }
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
-		
+
+
 		if(args[0].equals("1"))
 		{
 			Peer peer1 = new Peer("/src/data/config.properties", "Client_1");
@@ -22,57 +31,36 @@ public class Test_Client {
 			file = new File(absolutePath + "/test_client/client_1/qute.jpg");
 			Long fileLength = file.length();
 			System.out.println("fileLength :" + fileLength);
-			System.out.println("modified Length :" + Math.floor(0.05*fileLength));
-			peer1.startFileSenderManager("/test_client/client_1/qute.jpg", 0, (long) Math.floor(0.05*fileLength));
-			peer2.startFileSenderManager("/test_client/client_2/qute.jpg", (long)Math.floor(0.2*fileLength) + 1, (long)Math.floor(0.25*fileLength));
-			peer3.startFileSenderManager("/test_client/client_3/qute.jpg",(long) Math.floor(0.4*fileLength) + 1, (long)Math.floor(0.45*fileLength));
-			peer4.startFileSenderManager("/test_client/client_4/qute.jpg",(long) Math.floor(0.6*fileLength) + 1, (long)Math.floor(0.65*fileLength));
-			peer5.startFileSenderManager("/test_client/client_5/qute.jpg", (long)Math.floor(0.8*fileLength) + 1, (long)Math.floor(0.85*fileLength));
-			
-			try {
-				Thread t = new Thread();
-				t.sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
-			
+			System.out.println("modified Length :" + Math.floor(0.05 * fileLength));
+			peer1.startFileSenderManager("/test_client/client_1/qute.jpg", 0, (long) Math.floor(0.05 * fileLength));
+			peer2.startFileSenderManager("/test_client/client_2/qute.jpg", (long) Math.floor(0.2 * fileLength) + 1, (long) Math.floor(0.25 * fileLength));
+			peer3.startFileSenderManager("/test_client/client_3/qute.jpg", (long) Math.floor(0.4 * fileLength) + 1, (long) Math.floor(0.45 * fileLength));
+			peer4.startFileSenderManager("/test_client/client_4/qute.jpg", (long) Math.floor(0.6 * fileLength) + 1, (long) Math.floor(0.65 * fileLength));
+			peer5.startFileSenderManager("/test_client/client_5/qute.jpg", (long) Math.floor(0.8 * fileLength) + 1, (long) Math.floor(0.85 * fileLength));
+
+            pause(10);
+
 			peer1.addSegmentToShare((long) Math.floor(0.05*fileLength) + 1, (long) Math.floor(0.1*fileLength));
 			peer2.addSegmentToShare((long) Math.floor(0.25*fileLength) + 1, (long) Math.floor(0.3*fileLength));
 			peer3.addSegmentToShare((long) Math.floor(0.45*fileLength) + 1, (long) Math.floor(0.5*fileLength));
 			peer4.addSegmentToShare((long) Math.floor(0.65*fileLength) + 1, (long) Math.floor(0.7*fileLength));
 			peer5.addSegmentToShare((long) Math.floor(0.85*fileLength) + 1, (long) Math.floor(0.9*fileLength));
-			
-			try {
-				Thread t = new Thread();
-				t.sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+
+            pause(10);
 			
 			peer1.addSegmentToShare((long) Math.floor(0.1*fileLength) + 1, (long) Math.floor(0.15*fileLength));
 			peer2.addSegmentToShare((long) Math.floor(0.3*fileLength) + 1, (long) Math.floor(0.35*fileLength));
 			peer3.addSegmentToShare((long) Math.floor(0.5*fileLength) + 1, (long) Math.floor(0.55*fileLength));
 			peer4.addSegmentToShare((long) Math.floor(0.7*fileLength) + 1, (long) Math.floor(0.75*fileLength));
 			peer5.addSegmentToShare((long) Math.floor(0.9*fileLength) + 1, (long) Math.floor(0.95*fileLength));
-			
-			try {
-				Thread t = new Thread();
-				t.sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+            pause(10);
 			
 			peer1.addSegmentToShare((long) Math.floor(0.15*fileLength) + 1, (long) Math.floor(0.2*fileLength));
 			peer2.addSegmentToShare((long) Math.floor(0.35*fileLength) + 1, (long) Math.floor(0.4*fileLength));
 			peer3.addSegmentToShare((long) Math.floor(0.55*fileLength) + 1, (long) Math.floor(0.6*fileLength));
 			peer4.addSegmentToShare((long) Math.floor(0.75*fileLength) + 1, (long) Math.floor(0.8*fileLength));
-			peer5.addSegmentToShare((long) Math.floor(0.95*fileLength) + 1, fileLength);
+			peer5.addSegmentToShare((long) Math.floor(0.95*fileLength) + 1, fileLength-1);
 			
 			while(true);
 		}
@@ -83,6 +71,7 @@ public class Test_Client {
 			Peer peer8 = new Peer("/src/data/config.properties", "Client_8");
 			Peer peer9 = new Peer("/src/data/config.properties", "Client_9");
 			Peer peer10 = new Peer("/src/data/config.properties", "Client_10");
+
 			
 			peer6.getTrackerList();
 			peer6.getFileTracker("qute.jpg","/test_client/client_6");
@@ -94,6 +83,12 @@ public class Test_Client {
 			peer9.getFileTracker("qute.jpg","/test_client/client_9");
 			peer10.getTrackerList();
 			peer10.getFileTracker("qute.jpg","/test_client/client_10");
+
+            peer6.waitForDownload();
+            peer7.waitForDownload();
+            peer8.waitForDownload();
+            peer9.waitForDownload();
+            peer10.waitForDownload();
 		}
 		//peer6.getFileTracker("qute.jpg");
 		

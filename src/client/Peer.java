@@ -52,6 +52,7 @@ public class Peer
 	private BufferedReader in;
 	private Response response;
 	private ArrayList<String> message = new ArrayList<String>();
+    private FutureTask<Boolean> futureThread = null;
 
 	/**
 	 * Constructor
@@ -341,7 +342,7 @@ public class Peer
 			fsManager = new FileSenderManager(share_file, my_port, myQueue);
 			Thread t = new Thread(fsManager);
 			t.start();
-			utThread = new UpdateTrackerThread(file.getName(),myQueue, my_ip,String.valueOf(my_port), out, in);
+			utThread = new UpdateTrackerThread(peerName, file.getName(),myQueue, my_ip,String.valueOf(my_port), out, in);
 			utThread.start();
 
 		} catch (InterruptedException e) {
@@ -383,8 +384,6 @@ public class Peer
 				}
 			}
 
-			fsManager.sleep(10000);
-			utThread.sleep(10000);
 			if(removeObjects.size() > 0)
 				myQueue.removeAll(removeObjects);
 			myQueue.put(share_start);
@@ -462,16 +461,30 @@ public class Peer
 
 	public void getFileTracker(String filename, String relativePath)
 	{
-		FutureTask<Boolean> futureThread =new FutureTask<Boolean>(new FileDownloadThread(filename, out, in, MAX_SEGMENT_SIZE, currentPath + relativePath));
+		futureThread =new FutureTask<Boolean>(new FileDownloadThread(filename, out, in, MAX_SEGMENT_SIZE, currentPath + relativePath));
+
 		futureThread.run();
-		try {
-			Boolean isComplete = futureThread.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
+
 	}
+    public void waitForDownload()
+    {
+        Boolean isComplete = null;
+        try {
+            isComplete = futureThread.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if(isComplete)
+        {
+            System.out.println("I'm " + peerName + ", and I received the file correctly!");
+        }
+        else
+        {
+            System.out.println("I'm" + peerName + ", and the file MD5 did not match.");
+        }
+    }
 
 	/**
 	 * Requests a specific file tracker from the server. If successful, file download begins immediately
@@ -557,19 +570,15 @@ public class Peer
 		shared_files.put(filename, file_info);
 	}
 
-	public String sendUpdateTracker(updateTracker tracker)
-	{
-		return "";
-	}
 
 	/*
     Call after sending a message to the server. Stores all incoming messages into queue.
 	 */
-	public void recvFromServer()
+	public void recvFromServer(String end_token)
 	{
-		String resp = null;
+		String resp = "";
 		try {
-			while( (resp = in.readLine()) != null )
+			while( (resp != null && !resp.contains(end_token)) )
 			{
                 resp = in.readLine();
 				message.add(resp);
@@ -593,6 +602,7 @@ public class Peer
 		}
 
 		out.println(REQ_LIST);
+        recvFromServer("LIST END");
 
 		if( message.size() == 0 )
 		{
@@ -601,7 +611,7 @@ public class Peer
 		}
 
 		tracker_list = new RespList(message);
-		tracker_list.print();
+		//tracker_list.print();
 		//clear the message queue since we've processed them
 		message.clear();
 	}

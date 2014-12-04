@@ -16,8 +16,9 @@ public class UpdateTrackerThread extends Thread
 	private String port;
 	private PrintWriter out;
 	private BufferedReader in;
+    private String peerName;
 	
-	public UpdateTrackerThread(String fileName, BlockingQueue<Long> myQueue, String ipAddress, String port, PrintWriter out, BufferedReader in)
+	public UpdateTrackerThread(String peerName, String fileName, BlockingQueue<Long> myQueue, String ipAddress, String port, PrintWriter out, BufferedReader in)
 	{
 		this.fileName = fileName;
 		this.myQueue = myQueue;
@@ -25,6 +26,7 @@ public class UpdateTrackerThread extends Thread
 		this.port = port;
 		this.out = out;
 		this.in = in;
+        this.peerName = peerName;
 	}
 
 	public void run()
@@ -37,7 +39,6 @@ public class UpdateTrackerThread extends Thread
 					this.sleep(10);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 			
@@ -54,12 +55,10 @@ public class UpdateTrackerThread extends Thread
 				req.setEndBytes((Long) myQueueArray[lcv]);
 
 				out.println(req.toString());
-                System.out.println(req.toString());
 				String resp = "";
 				try
 				{
 					resp = in.readLine();
-                    System.out.println(resp);
 				}
 				catch(IOException e)
 				{
@@ -72,7 +71,7 @@ public class UpdateTrackerThread extends Thread
 				}
 				else if(resp.contains("succ"))
 				{
-					System.out.println("I am sharing from "+ req.getStartBytes() + " to " + req.getEndBytes() + "." );
+					System.out.println("I am " + peerName + " and I am sharing from "+ req.getStartBytes() + " to " + req.getEndBytes() + "." );
 				}
 				else
 				{
@@ -81,13 +80,14 @@ public class UpdateTrackerThread extends Thread
 				}
 				
 			}
+            try {
+
+                this.sleep(9000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+            }
 			
-			try {
-				this.sleep(890000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			}
+
 			
 		}
 	}

@@ -1,8 +1,10 @@
 package client;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -12,6 +14,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -31,6 +34,7 @@ import java.util.function.ToLongFunction;
 
 import server.com.File.Models.FileTracker;
 import server.com.File.Models.PeerInfo;
+import server.com.File.Models.SharedFileDetails;
 
 public class FileDownloadThread implements Callable<Boolean> {
 
@@ -79,14 +83,16 @@ public class FileDownloadThread implements Callable<Boolean> {
 		out.println(msg);
 		ArrayList<String> message = new ArrayList<String>();
 		String resp = "";
-		try {
-			while( resp != null && !resp.contains("GET END") )
-			{
+		while( resp != null && !resp.contains("GET END") )
+		{
+			try {
+				resp = in.readLine();
 				message.add(resp);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			System.out.println("Communication with server was interrupted. Exiting..");
-			System.exit(1);
+			
 		}
 		if( message.size() == 0 )
 		{
@@ -324,10 +330,19 @@ public class FileDownloadThread implements Callable<Boolean> {
 
 			if(noOfSegmentsDownloaded == 0)
 			{
+				Thread t = new Thread();
+				try {
+					t.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+				
 				tracker = this.getRecentTracker(filename);
                 filesize = tracker.getDetails().getFilesize();
 			}
 
+			String filepath = currentPath + "/" + filename;
 
 			File file = new File(filepath);
 

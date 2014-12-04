@@ -541,6 +541,7 @@ public class Peer
 		try {
 			while( resp != null && !resp.contains(end_token) )
 			{
+                resp = in.readLine();
 				message.add(resp);
 			}
 		} catch (IOException e) {

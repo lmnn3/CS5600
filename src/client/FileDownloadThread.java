@@ -32,7 +32,7 @@ import java.util.function.ToLongFunction;
 import server.com.File.Models.FileTracker;
 import server.com.File.Models.PeerInfo;
 
-public class FileDownloadThread implements Callable<UpdateTrackerThread> {
+public class FileDownloadThread implements Callable<Boolean> {
 
 	private String filename;
 	private PrintWriter out;

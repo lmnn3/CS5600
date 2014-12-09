@@ -37,7 +37,10 @@ public class ClientWorker extends Thread {
 		this.relativePath = relativePath;
 	}
 
-
+    /*
+     * Listens on port for client messages and responds to each message.
+     * File Manager class is invoked for generating the response messages for a message.
+     */
 	public void run()
 	{
 		String line = "";

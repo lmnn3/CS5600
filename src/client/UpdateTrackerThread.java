@@ -82,7 +82,7 @@ public class UpdateTrackerThread extends Thread
 			}
             try {
 
-                this.sleep(9000);
+                this.sleep(890000);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
             }

@@ -86,7 +86,6 @@ public class Peer
 		try {
 			ServerSocket socket =new ServerSocket(0);
 			my_ip = this.getLocalHostLANAddress().toString();
-			System.out.println("IP: " + my_ip);
 			my_port = socket.getLocalPort();
 			socket.close();
 		} catch (UnknownHostException e) {
@@ -277,7 +276,6 @@ public class Peer
 			socket = new Socket(server_ip, server_port);
 			out    = new PrintWriter(socket.getOutputStream(), true);
 			in     = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			System.out.println("Connected to server:" + server_ip.toString());
 		}
 		catch (UnknownHostException e)
 		{
@@ -422,7 +420,6 @@ public class Peer
 		msg = new createFileTrackerMessage(info.filename, info.filesize, info.description,
 				info.md5, this.my_ip, this.my_port);
 		out.println(msg.toString());
-		System.out.println("Sent message: " + msg.toString());
 		try {
 			resp = in.readLine();
 		} catch (IOException e) {

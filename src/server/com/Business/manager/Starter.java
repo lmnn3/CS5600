@@ -18,15 +18,20 @@ public class Starter {
 	{
 		this.relativePath = relativePath;
 	}
-	
+
+    /* Starts a client worker thread for every client connection
+     *
+     */
 	public void ListenSocket()
 	{
 		ServerSocket server = null;
+        Removal15Mins remove = new Removal15Mins(sem, relativePath);
+        remove.start();
 		try{
-			server = new ServerSocket(4000);
+			server = new ServerSocket(3456);
 			server.setReceiveBufferSize(10000);
 		  } catch (IOException e) {
-		    System.out.println("Could not listen on port 4000");
+		    System.out.println("Could not listen on port 3456");
 		    System.exit(-1);
 		  }
 		  while(true){

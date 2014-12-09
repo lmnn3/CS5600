@@ -1,9 +1,7 @@
 package server.com.Business.models;
 
 /*
- * author: Venkata Prashant
- * Description: This class represents the message format requesting a list of files available;
- * Version: 0.1
+ * Java Object to represent a request list message exchanged between server and client
  */
 public class RequestList {
 
